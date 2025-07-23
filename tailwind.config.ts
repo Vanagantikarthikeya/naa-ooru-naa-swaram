@@ -18,6 +18,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'telugu': ['Noto Sans Telugu', 'sans-serif'],
+				'sans': ['Inter', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -61,7 +65,22 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				cultural: {
+					'gold': 'hsl(var(--cultural-gold))',
+					'deep-violet': 'hsl(var(--cultural-deep-violet))',
+					'light-violet': 'hsl(var(--cultural-light-violet))',
+					'warm-bg': 'hsl(var(--cultural-warm-bg))',
+					'text-dark': 'hsl(var(--cultural-text-dark))',
 				}
+			},
+			backgroundImage: {
+				'gradient-cultural': 'var(--gradient-cultural)',
+				'gradient-warm': 'var(--gradient-warm)',
+			},
+			boxShadow: {
+				'cultural': 'var(--shadow-cultural)',
+				'gold': 'var(--shadow-gold)',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
