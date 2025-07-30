@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AudioRecorder } from '@/components/AudioRecorder';
 import { StoryCard } from '@/components/StoryCard';
 import Navigation from '@/components/Navigation';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Languages } from 'lucide-react';
 import culturalBg from '@/assets/telugu-cultural-bg.jpg';
 
@@ -25,9 +25,7 @@ const Index = () => {
   const [textContent, setTextContent] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [storyTitle, setStoryTitle] = useState('');
-  const [teluguText, setTeluguText] = useState('');
-  const [englishText, setEnglishText] = useState('');
-  const [isConverting, setIsConverting] = useState(false);
+  const { t, language, toggleLanguage } = useLanguage();
   const [stories, setStories] = useState<Story[]>([
     {
       id: '1',
@@ -68,8 +66,8 @@ const Index = () => {
   const handleTextSubmit = () => {
     if (!textContent.trim() || !selectedDistrict || !storyTitle.trim()) {
       toast({
-        title: "అసంపూర్ణ సమాచారం",
-        description: "దయచేసి అన్ని ఫీల్డ్‌లను పూర్తి చేయండి",
+        title: t('incompleteInfo'),
+        description: t('fillAllFields'),
         variant: "destructive",
       });
       return;
@@ -90,20 +88,9 @@ const Index = () => {
     setSelectedDistrict('');
 
     toast({
-      title: "కథ జోడించబడింది! 🎉",
-      description: "మీ కథ విజయవంతంగా భాగస్వామ్యం చేయబడింది",
+      title: t('storyAdded'),
+      description: t('storyShared'),
     });
-  };
-
-  const handleTranslate = async () => {
-    if (!teluguText.trim()) return;
-    
-    setIsConverting(true);
-    // Simulate translation (in real app, use Google Translate API or similar)
-    setTimeout(() => {
-      setEnglishText(`[Translation of: ${teluguText}]`);
-      setIsConverting(false);
-    }, 1500);
   };
 
   const handleAudioUpload = (audioFile: File) => {
@@ -112,9 +99,9 @@ const Index = () => {
     
     const newStory: Story = {
       id: Date.now().toString(),
-      title: storyTitle || 'ఆడియో కథ',
-      content: 'ఇది ఒక ఆడియో రికార్డింగ్. వినడానికి ప్లే బటన్ నొక్కండి.',
-      district: selectedDistrict || 'తెలియని జిల్లా',
+      title: storyTitle || t('audioStory'),
+      content: t('audioRecordingDesc'),
+      district: selectedDistrict || t('unknownDistrict'),
       audioUrl,
       type: 'audio',
       timestamp: 'ఇప్పుడే'
@@ -138,69 +125,32 @@ const Index = () => {
         
         {/* Header Section */}
         <div className="relative z-10 px-4 py-16 text-center">
-          {/* Telugu to English Converter - Top Right */}
+          {/* Language Toggle - Top Right */}
           <div className="absolute top-4 right-4">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="font-telugu bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20">
-                  <Languages className="w-4 h-4 mr-2" />
-                  అనువాదం
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="font-telugu">తెలుగు నుండి ఇంగ్లీష్ అనువాదం</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <label className="font-telugu text-sm font-medium mb-2 block">
-                      తెలుగు వచనం
-                    </label>
-                    <Textarea
-                      value={teluguText}
-                      onChange={(e) => setTeluguText(e.target.value)}
-                      placeholder="తెలుగు వచనం టైప్ చేయండి..."
-                      className="font-telugu"
-                    />
-                  </div>
-                  
-                  <Button 
-                    onClick={handleTranslate}
-                    disabled={isConverting || !teluguText.trim()}
-                    className="w-full font-telugu"
-                  >
-                    {isConverting ? 'అనువదిస్తోంది...' : 'అనువదించు'}
-                  </Button>
-
-                  {englishText && (
-                    <div>
-                      <label className="font-telugu text-sm font-medium mb-2 block">
-                        English Translation
-                      </label>
-                      <Textarea
-                        value={englishText}
-                        readOnly
-                        className="bg-muted"
-                      />
-                    </div>
-                  )}
-                </div>
-              </DialogContent>
-            </Dialog>
+            <Button 
+              onClick={toggleLanguage}
+              variant="outline" 
+              className={`font-telugu bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 ${
+                language === 'en' ? 'bg-white/20' : ''
+              }`}
+            >
+              <Languages className="w-4 h-4 mr-2" />
+              {t('converter')} ({language === 'te' ? 'EN' : 'TE'})
+            </Button>
           </div>
 
           <div className="max-w-4xl mx-auto">
             <h1 className="font-telugu text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg">
-              నా ఊరు, నా స్వరం
+              {t('siteTitle')}
             </h1>
             <p className="font-telugu text-lg md:text-xl text-white/90 mb-8 leading-relaxed">
-              మీ ప్రాంతాన్ని వివరించండి లేదా మీ సంప్రదాయాన్ని తెలుగులో పంచుకోండి 📜
+              {t('siteSubtitle')}
             </p>
             <div className="flex flex-wrap justify-center gap-2 text-white/80">
-              <span className="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-sm">🏛️ సంస్కృతి</span>
-              <span className="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-sm">🎭 సంప్రదాయాలు</span>
-              <span className="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-sm">🗣️ కథలు</span>
-              <span className="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-sm">📍 స్థలాలు</span>
+              <span className="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-sm">{t('culture')}</span>
+              <span className="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-sm">{t('traditions')}</span>
+              <span className="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-sm">{t('stories')}</span>
+              <span className="bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full text-sm">{t('places')}</span>
             </div>
           </div>
         </div>
@@ -212,29 +162,29 @@ const Index = () => {
           {/* Text Input */}
           <Card className="p-6 bg-card/80 backdrop-blur-sm shadow-cultural">
             <h2 className="font-telugu text-2xl font-semibold text-primary mb-6">
-              ✍️ మీ కథను వ్రాయండి
+              {t('writeStory')}
             </h2>
             
             <div className="space-y-4">
               <div>
                 <label className="font-telugu text-sm font-medium text-foreground mb-2 block">
-                  కథ శీర్షిక
+                  {t('storyTitle')}
                 </label>
                 <Textarea
                   value={storyTitle}
                   onChange={(e) => setStoryTitle(e.target.value)}
-                  placeholder="మీ కథకు శీర్షిక ఇవ్వండి..."
+                  placeholder={language === 'te' ? "మీ కథకు శీర్షిక ఇవ్వండి..." : "Give a title to your story..."}
                   className="font-telugu resize-none h-16"
                 />
               </div>
 
               <div>
                 <label className="font-telugu text-sm font-medium text-foreground mb-2 block">
-                  జిల్లా / ప్రాంతం
+                  {t('district')}
                 </label>
                 <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
                   <SelectTrigger className="font-telugu">
-                    <SelectValue placeholder="మీ జిల్లాను ఎంచుకోండి" />
+                    <SelectValue placeholder={t('selectDistrict')} />
                   </SelectTrigger>
                   <SelectContent>
                     {districts.map((district) => (
@@ -248,12 +198,12 @@ const Index = () => {
 
               <div>
                 <label className="font-telugu text-sm font-medium text-foreground mb-2 block">
-                  మీ కథ
+                  {t('yourStory')}
                 </label>
                 <Textarea
                   value={textContent}
                   onChange={(e) => setTextContent(e.target.value)}
-                  placeholder="మీ ఊరి గురించి, సంప్రదాయాల గురించి, లేదా ఏదైనా ప్రత్యేకమైన విషయం గురించి వ్రాయండి..."
+                  placeholder={t('storyPlaceholder')}
                   className="font-telugu min-h-[120px] leading-relaxed"
                 />
               </div>
@@ -263,7 +213,7 @@ const Index = () => {
                 className="w-full bg-gradient-cultural hover:bg-primary/90 shadow-gold font-telugu text-base"
                 size="lg"
               >
-                కథను పంచుకోండి 🌟
+                {t('shareStory')}
               </Button>
             </div>
           </Card>
@@ -275,7 +225,7 @@ const Index = () => {
         {/* Stories Section */}
         <div className="space-y-6">
           <h2 className="font-telugu text-3xl font-bold text-primary text-center">
-            🏛️ ఇతర కథలు మరియు సంప్రదాయాలు
+            {t('otherStories')}
           </h2>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -287,10 +237,10 @@ const Index = () => {
           {stories.length === 0 && (
             <Card className="p-12 text-center bg-card/50 backdrop-blur-sm">
               <h3 className="font-telugu text-xl font-semibold text-muted-foreground mb-2">
-                ఇంకా కథలు లేవు
+                {t('noStories')}
               </h3>
               <p className="font-telugu text-muted-foreground">
-                మీరే మొదటి కథను పంచుకోండి! 🌟
+                {t('noStoriesDesc')}
               </p>
             </Card>
           )}
@@ -299,11 +249,10 @@ const Index = () => {
         {/* Thank You Section */}
         <Card className="p-8 bg-gradient-cultural text-center shadow-cultural">
           <h3 className="font-telugu text-2xl font-bold text-white mb-4">
-            🙏 ధన్యవాదాలు
+            {t('thankYou')}
           </h3>
           <p className="font-telugu text-white/90 leading-relaxed">
-            మీ సంస్కృతిని మరియు సంప్రదాయాలను భాగస్వామ్యం చేసినందుకు ధన్యవాదాలు. 
-            మీ కథలు మన వారసత్వాన్ని భవిష్యత్ తరాలకు అందించడంలో సహాయపడతాయి.
+            {t('thankYouDesc')}
           </p>
         </Card>
       </div>

@@ -1,16 +1,18 @@
 import { Button } from '@/components/ui/button';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
 import { Link, useLocation } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Home, Info, User, LogIn } from 'lucide-react';
 
 const Navigation = () => {
   const location = useLocation();
+  const { t } = useLanguage();
 
   const navItems = [
-    { path: '/', label: 'హోమ్', icon: Home },
-    { path: '/about', label: 'మా గురించి', icon: Info },
-    { path: '/profile', label: 'ప్రొఫైల్', icon: User },
-    { path: '/login', label: 'లాగిన్', icon: LogIn },
+    { path: '/', label: t('home'), icon: Home },
+    { path: '/about', label: t('about'), icon: Info },
+    { path: '/profile', label: t('profile'), icon: User },
+    { path: '/login', label: t('login'), icon: LogIn },
   ];
 
   return (
@@ -22,7 +24,7 @@ const Navigation = () => {
             <div className="w-8 h-8 bg-gradient-cultural rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-sm">స్వ</span>
             </div>
-            <span className="font-telugu font-bold text-xl text-primary">నా స్వరం</span>
+            <span className="font-telugu font-bold text-xl text-primary">{t('siteTitle')}</span>
           </Link>
 
           {/* Navigation Menu */}

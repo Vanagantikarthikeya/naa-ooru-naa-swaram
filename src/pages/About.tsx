@@ -2,8 +2,10 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, Star, Users, Globe, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const About = () => {
+  const { t } = useLanguage();
   const motivationalQuotes = [
     {
       text: "మన సంస్కృతి మన గుర్తింపు. దానిని భవిష్యత్తుకు అందించడం మన బాధ్యత.",
@@ -49,7 +51,7 @@ const About = () => {
         <Link to="/">
           <Button variant="ghost" className="font-telugu">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            వెనుకకు
+            {t('back')}
           </Button>
         </Link>
       </div>
@@ -58,18 +60,17 @@ const About = () => {
         {/* Header */}
         <div className="text-center space-y-6">
           <h1 className="font-telugu text-4xl md:text-5xl font-bold text-primary">
-            మా గురించి 🌟
+            {t('aboutTitle')}
           </h1>
           <p className="font-telugu text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-            "నా ఊరు, నా స్వరం" ప్రాజెక్ట్ తెలుగు సంస్కృతిని మరియు సంప్రదాయాలను 
-            డిజిటల్ యుగంలో పరిరక్షించడానికి ఒక అద్భుతమైన వేదిక.
+            {t('aboutSubtitle')}
           </p>
         </div>
 
         {/* Mission Statement */}
         <Card className="p-8 bg-gradient-cultural text-center shadow-cultural">
           <h2 className="font-telugu text-2xl font-bold text-white mb-4">
-            మా లక్ష్యం
+            {t('ourMission')}
           </h2>
           <p className="font-telugu text-white/90 text-lg leading-relaxed">
             ప్రతి తెలుగు వ్యక్తి తమ ప్రాంత కథలను, సంప్రదాయాలను, మరియు అనుభవాలను 
