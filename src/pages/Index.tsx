@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AudioRecorder } from '@/components/AudioRecorder';
 import { StoryCard } from '@/components/StoryCard';
+import Navigation from '@/components/Navigation';
 import { useToast } from '@/hooks/use-toast';
 import culturalBg from '@/assets/telugu-cultural-bg.jpg';
 
@@ -110,6 +111,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-warm">
+      <Navigation />
       {/* Hero Background */}
       <div 
         className="relative bg-cover bg-center bg-no-repeat"
