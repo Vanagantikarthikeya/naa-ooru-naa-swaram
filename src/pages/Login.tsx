@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, Mail, Lock, User, Phone } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -70,8 +71,19 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-warm flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-warm">
+      {/* Back Button */}
+      <div className="absolute top-4 left-4 z-10">
+        <Link to="/">
+          <Button variant="ghost" className="font-telugu">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            వెనుకకు
+          </Button>
+        </Link>
+      </div>
+      
+      <div className="flex items-center justify-center p-4 min-h-screen">
+        <div className="w-full max-w-md">
         <Card className="p-8 bg-card/90 backdrop-blur-sm shadow-cultural">
           <div className="text-center mb-8">
             <h1 className="font-telugu text-3xl font-bold text-primary mb-2">
@@ -256,6 +268,7 @@ const Login = () => {
             </p>
           </div>
         </Card>
+        </div>
       </div>
     </div>
   );

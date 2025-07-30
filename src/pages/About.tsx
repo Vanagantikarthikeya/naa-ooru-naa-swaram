@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Heart, Star, Users, Globe } from 'lucide-react';
+import { Heart, Star, Users, Globe, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const About = () => {
   const motivationalQuotes = [
@@ -43,7 +44,17 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-gradient-warm">
-      <div className="max-w-4xl mx-auto px-4 py-12 space-y-12">
+      {/* Back Button */}
+      <div className="p-4">
+        <Link to="/">
+          <Button variant="ghost" className="font-telugu">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            వెనుకకు
+          </Button>
+        </Link>
+      </div>
+      
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-12">
         {/* Header */}
         <div className="text-center space-y-6">
           <h1 className="font-telugu text-4xl md:text-5xl font-bold text-primary">

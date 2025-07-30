@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AudioRecorder } from '@/components/AudioRecorder';
 import { StoryCard } from '@/components/StoryCard';
 import Navigation from '@/components/Navigation';
 import { useToast } from '@/hooks/use-toast';
+import { Languages } from 'lucide-react';
 import culturalBg from '@/assets/telugu-cultural-bg.jpg';
 
 interface Story {
@@ -23,6 +25,9 @@ const Index = () => {
   const [textContent, setTextContent] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [storyTitle, setStoryTitle] = useState('');
+  const [teluguText, setTeluguText] = useState('');
+  const [englishText, setEnglishText] = useState('');
+  const [isConverting, setIsConverting] = useState(false);
   const [stories, setStories] = useState<Story[]>([
     {
       id: '1',
@@ -90,6 +95,17 @@ const Index = () => {
     });
   };
 
+  const handleTranslate = async () => {
+    if (!teluguText.trim()) return;
+    
+    setIsConverting(true);
+    // Simulate translation (in real app, use Google Translate API or similar)
+    setTimeout(() => {
+      setEnglishText(`[Translation of: ${teluguText}]`);
+      setIsConverting(false);
+    }, 1500);
+  };
+
   const handleAudioUpload = (audioFile: File) => {
     // In a real app, you would upload this to a server
     const audioUrl = URL.createObjectURL(audioFile);
@@ -119,8 +135,60 @@ const Index = () => {
       >
         <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-primary/40 to-primary/60"></div>
         
+        
         {/* Header Section */}
         <div className="relative z-10 px-4 py-16 text-center">
+          {/* Telugu to English Converter - Top Right */}
+          <div className="absolute top-4 right-4">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="font-telugu bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20">
+                  <Languages className="w-4 h-4 mr-2" />
+                  అనువాదం
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="font-telugu">తెలుగు నుండి ఇంగ్లీష్ అనువాదం</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <label className="font-telugu text-sm font-medium mb-2 block">
+                      తెలుగు వచనం
+                    </label>
+                    <Textarea
+                      value={teluguText}
+                      onChange={(e) => setTeluguText(e.target.value)}
+                      placeholder="తెలుగు వచనం టైప్ చేయండి..."
+                      className="font-telugu"
+                    />
+                  </div>
+                  
+                  <Button 
+                    onClick={handleTranslate}
+                    disabled={isConverting || !teluguText.trim()}
+                    className="w-full font-telugu"
+                  >
+                    {isConverting ? 'అనువదిస్తోంది...' : 'అనువదించు'}
+                  </Button>
+
+                  {englishText && (
+                    <div>
+                      <label className="font-telugu text-sm font-medium mb-2 block">
+                        English Translation
+                      </label>
+                      <Textarea
+                        value={englishText}
+                        readOnly
+                        className="bg-muted"
+                      />
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+
           <div className="max-w-4xl mx-auto">
             <h1 className="font-telugu text-4xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg">
               నా ఊరు, నా స్వరం

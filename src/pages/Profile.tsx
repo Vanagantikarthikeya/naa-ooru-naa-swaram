@@ -6,7 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Save, MapPin, Calendar, Award } from 'lucide-react';
+import { Edit, Save, MapPin, Calendar, Award, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
 const Profile = () => {
@@ -53,7 +54,17 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gradient-warm">
-      <div className="max-w-4xl mx-auto px-4 py-12 space-y-8">
+      {/* Back Button */}
+      <div className="p-4">
+        <Link to="/">
+          <Button variant="ghost" className="font-telugu">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            వెనుకకు
+          </Button>
+        </Link>
+      </div>
+      
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
         {/* Profile Header */}
         <Card className="p-8 bg-card/80 backdrop-blur-sm shadow-cultural">
           <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">

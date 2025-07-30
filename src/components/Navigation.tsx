@@ -1,27 +1,10 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
 import { Link, useLocation } from 'react-router-dom';
-import { Languages, Home, Info, User, LogIn } from 'lucide-react';
+import { Home, Info, User, LogIn } from 'lucide-react';
 
 const Navigation = () => {
-  const [teluguText, setTeluguText] = useState('');
-  const [englishText, setEnglishText] = useState('');
-  const [isConverting, setIsConverting] = useState(false);
   const location = useLocation();
-
-  const handleTranslate = async () => {
-    if (!teluguText.trim()) return;
-    
-    setIsConverting(true);
-    // Simulate translation (in real app, use Google Translate API or similar)
-    setTimeout(() => {
-      setEnglishText(`[Translation of: ${teluguText}]`);
-      setIsConverting(false);
-    }, 1500);
-  };
 
   const navItems = [
     { path: '/', label: 'హోమ్', icon: Home },
@@ -60,55 +43,6 @@ const Navigation = () => {
               ))}
             </NavigationMenuList>
           </NavigationMenu>
-
-          {/* Telugu to English Converter */}
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="font-telugu">
-                <Languages className="w-4 h-4 mr-2" />
-                అనువాదం
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle className="font-telugu">తెలుగు నుండి ఇంగ్లీష్ అనువాదం</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <label className="font-telugu text-sm font-medium mb-2 block">
-                    తెలుగు వచనం
-                  </label>
-                  <Textarea
-                    value={teluguText}
-                    onChange={(e) => setTeluguText(e.target.value)}
-                    placeholder="తెలుగు వచనం టైప్ చేయండి..."
-                    className="font-telugu"
-                  />
-                </div>
-                
-                <Button 
-                  onClick={handleTranslate}
-                  disabled={isConverting || !teluguText.trim()}
-                  className="w-full font-telugu"
-                >
-                  {isConverting ? 'అనువదిస్తోంది...' : 'అనువదించు'}
-                </Button>
-
-                {englishText && (
-                  <div>
-                    <label className="font-telugu text-sm font-medium mb-2 block">
-                      English Translation
-                    </label>
-                    <Textarea
-                      value={englishText}
-                      readOnly
-                      className="bg-muted"
-                    />
-                  </div>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
 
           {/* Mobile Menu */}
           <div className="md:hidden">
