@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,7 +8,8 @@ import { StoryCard } from '@/components/StoryCard';
 import Navigation from '@/components/Navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Languages } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Languages, Loader2 } from 'lucide-react';
 import culturalBg from '@/assets/telugu-cultural-bg.jpg';
 
 interface Story {
@@ -25,36 +26,48 @@ const Index = () => {
   const [textContent, setTextContent] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [storyTitle, setStoryTitle] = useState('');
+  const [stories, setStories] = useState<Story[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const { t, language, toggleLanguage } = useLanguage();
-  const [stories, setStories] = useState<Story[]>([
-    {
-      id: '1',
-      title: 'మా ఊరి పండుగలు',
-      content: 'మా గ్రామంలో ప్రతి సంవత్సరం జాతర జరుగుతుంది. అది చాలా ఘనంగా జరుగుతుంది. మొత్తం ఊరు వాళ్ళు కలిసి పండుగ చేసుకుంటారు. ప్రకృతి అందంగా ఉంటుంది. పచ్చిక పొలాలు, కోకిలల కూత, చెట్లకొమ్మలమీద పక్షుల సందడి చూస్తే మనసుకు చాలా హాయిగా అనిపిస్తుంది.',
-      district: 'గుంటూరు',
-      type: 'text',
-      timestamp: '2 గంటల క్రితం'
-    },
-    {
-      id: '2',
-      title: 'తాతగారి కథలు',
-      content: 'మా తాతగారు చాలా బాగా కథలు చెప్పేవారు. రాత్రి వేళల్లో అందరం కలిసి కూర్చుని వినేవాళ్ళం. ఆయన చెప్పే కథలు అంటే మాకు ఎంతో ఇష్టం. పాత కాలపు వీరుల గురించి, రాజుల గురించి, మంచి మనుషుల గురించి చెప్పేవారు.',
-      district: 'కృష్ణా',
-      type: 'text',
-      timestamp: '5 గంటల క్రితం'
-    },
-    {
-      id: '3',
-      title: 'మా గ్రామ దేవాలయం',
-      content: 'మా ఊరిలో చాలా పాత దేవాలయం ఉంది. అది మా పూర్వికుల కాలం నుండి ఉంది. ప్రతి రోజు ఉదయం సాయంత్రం పూజలు జరుగుతాయి. భక్తులు దూరదూర ప్రాంతాల నుండి వస్తారు. దేవుని దర్శనం చేసుకుని వెళ్ళిపోతారు.',
-      district: 'చిత్తూరు',
-      audioUrl: '/placeholder-audio.mp3',
-      type: 'audio',
-      timestamp: '1 రోజు క్రితం'
-    }
-  ]);
-
   const { toast } = useToast();
+
+  // Fetch stories from database
+  useEffect(() => {
+    fetchStories();
+  }, []);
+
+  const fetchStories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('stories')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedStories: Story[] = data.map((story) => ({
+        id: story.id,
+        title: story.title,
+        content: story.content,
+        district: story.district || 'Unknown',
+        audioUrl: story.audio_url || undefined,
+        type: story.type as 'audio' | 'text',
+        timestamp: new Date(story.created_at).toLocaleDateString('te-IN')
+      }));
+
+      setStories(formattedStories);
+    } catch (error) {
+      console.error('Error fetching stories:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load stories',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const districts = [
     'విశాఖపట్నం', 'విజయనగరం', 'శ్రీకాకుళం', 'గుంటూరు', 'కృష్ణా', 'వెస్ట్ గోదావరి',
@@ -63,7 +76,7 @@ const Index = () => {
     'నిజామాబాద్', 'కరీంనగర్', 'ఆదిలాబాద్', 'కొమురం భీమ్', 'మంచిర్యాల', 'ఖమ్మం'
   ];
 
-  const handleTextSubmit = () => {
+  const handleTextSubmit = async () => {
     if (!textContent.trim() || !selectedDistrict || !storyTitle.trim()) {
       toast({
         title: t('incompleteInfo'),
@@ -73,43 +86,121 @@ const Index = () => {
       return;
     }
 
-    const newStory: Story = {
-      id: Date.now().toString(),
-      title: storyTitle,
-      content: textContent,
-      district: selectedDistrict,
-      type: 'text',
-      timestamp: 'ఇప్పుడే'
-    };
+    setSubmitting(true);
+    try {
+      const { data, error } = await supabase
+        .from('stories')
+        .insert({
+          title: storyTitle,
+          content: textContent,
+          district: selectedDistrict,
+          type: 'text'
+        })
+        .select()
+        .single();
 
-    setStories(prev => [newStory, ...prev]);
-    setTextContent('');
-    setStoryTitle('');
-    setSelectedDistrict('');
+      if (error) throw error;
 
-    toast({
-      title: t('storyAdded'),
-      description: t('storyShared'),
-    });
+      // Add to local state for immediate UI update
+      const newStory: Story = {
+        id: data.id,
+        title: data.title,
+        content: data.content,
+        district: data.district || 'Unknown',
+        type: data.type as 'audio' | 'text',
+        timestamp: new Date(data.created_at).toLocaleDateString('te-IN')
+      };
+
+      setStories(prev => [newStory, ...prev]);
+      setTextContent('');
+      setStoryTitle('');
+      setSelectedDistrict('');
+
+      toast({
+        title: t('storyAdded'),
+        description: t('storyShared'),
+      });
+    } catch (error) {
+      console.error('Error saving story:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save story',
+        variant: 'destructive'
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleAudioUpload = (audioFile: File) => {
-    // In a real app, you would upload this to a server
-    const audioUrl = URL.createObjectURL(audioFile);
-    
-    const newStory: Story = {
-      id: Date.now().toString(),
-      title: storyTitle || t('audioStory'),
-      content: t('audioRecordingDesc'),
-      district: selectedDistrict || t('unknownDistrict'),
-      audioUrl,
-      type: 'audio',
-      timestamp: 'ఇప్పుడే'
-    };
+  const handleAudioUpload = async (audioFile: File) => {
+    if (!storyTitle.trim() || !selectedDistrict) {
+      toast({
+        title: t('incompleteInfo'),
+        description: t('fillAllFields'),
+        variant: "destructive",
+      });
+      return;
+    }
 
-    setStories(prev => [newStory, ...prev]);
-    setStoryTitle('');
-    setSelectedDistrict('');
+    setSubmitting(true);
+    try {
+      // Upload audio file to Supabase Storage
+      const fileName = `${Date.now()}-${audioFile.name}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('audio-stories')
+        .upload(fileName, audioFile);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('audio-stories')
+        .getPublicUrl(fileName);
+
+      // Save story to database
+      const { data, error } = await supabase
+        .from('stories')
+        .insert({
+          title: storyTitle,
+          content: t('audioRecordingDesc'),
+          district: selectedDistrict,
+          audio_url: publicUrl,
+          type: 'audio'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Add to local state for immediate UI update
+      const newStory: Story = {
+        id: data.id,
+        title: data.title,
+        content: data.content,
+        district: data.district || 'Unknown',
+        audioUrl: data.audio_url || undefined,
+        type: data.type as 'audio' | 'text',
+        timestamp: new Date(data.created_at).toLocaleDateString('te-IN')
+      };
+
+      setStories(prev => [newStory, ...prev]);
+      setStoryTitle('');
+      setSelectedDistrict('');
+
+      toast({
+        title: t('storyAdded'),
+        description: t('storyShared'),
+      });
+    } catch (error) {
+      console.error('Error saving audio story:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save audio story',
+        variant: 'destructive'
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -210,10 +301,18 @@ const Index = () => {
 
               <Button 
                 onClick={handleTextSubmit}
+                disabled={submitting}
                 className="w-full bg-gradient-cultural hover:bg-primary/90 shadow-gold font-telugu text-base"
                 size="lg"
               >
-                {t('shareStory')}
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {language === 'te' ? 'సేవ్ చేస్తోంది...' : 'Saving...'}
+                  </>
+                ) : (
+                  t('shareStory')
+                )}
               </Button>
             </div>
           </Card>
@@ -228,21 +327,41 @@ const Index = () => {
             {t('otherStories')}
           </h2>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {stories.map((story) => (
-              <StoryCard key={story.id} story={story} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <Card key={i} className="p-6 bg-card/50 backdrop-blur-sm animate-pulse">
+                  <div className="space-y-4">
+                    <div className="h-4 bg-muted rounded w-3/4"></div>
+                    <div className="h-3 bg-muted rounded w-1/2"></div>
+                    <div className="space-y-2">
+                      <div className="h-3 bg-muted rounded"></div>
+                      <div className="h-3 bg-muted rounded"></div>
+                      <div className="h-3 bg-muted rounded w-5/6"></div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {stories.map((story) => (
+                  <StoryCard key={story.id} story={story} />
+                ))}
+              </div>
 
-          {stories.length === 0 && (
-            <Card className="p-12 text-center bg-card/50 backdrop-blur-sm">
-              <h3 className="font-telugu text-xl font-semibold text-muted-foreground mb-2">
-                {t('noStories')}
-              </h3>
-              <p className="font-telugu text-muted-foreground">
-                {t('noStoriesDesc')}
-              </p>
-            </Card>
+              {stories.length === 0 && (
+                <Card className="p-12 text-center bg-card/50 backdrop-blur-sm">
+                  <h3 className="font-telugu text-xl font-semibold text-muted-foreground mb-2">
+                    {t('noStories')}
+                  </h3>
+                  <p className="font-telugu text-muted-foreground">
+                    {t('noStoriesDesc')}
+                  </p>
+                </Card>
+              )}
+            </>
           )}
         </div>
 
